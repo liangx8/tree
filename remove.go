@@ -4,6 +4,8 @@ package tree
 //)
 
 func find_for_remove(top *node,e interface{},c Compare) (*node,interface{},error){
+	var old interface{}
+	var err error
 	if top == nil {
 		return top,nil,NoFound
 	}
@@ -14,12 +16,18 @@ func find_for_remove(top *node,e interface{},c Compare) (*node,interface{},error
 		return ntop, top.e,err
 	}
 	if cp>0 {
-		lnode,old,err:=find_for_remove(top.l,e,c)
+		var lnode *node
+		lnode,old,err=find_for_remove(top.l,e,c)
 		top.l=lnode
-		return top,old,err
 	}
-	rnode,old,err:=find_for_remove(top.r,e,c)
-	top.r=rnode
+	if cp<0 {
+		var rnode *node
+		rnode,old,err=find_for_remove(top.r,e,c)
+		top.r=rnode
+	}
+	if top.l==nil {top.ln=0} else {top.ln=max(top.l.ln,top.l.rn)+1}
+	if top.r==nil {top.rn=0} else {top.rn=max(top.r.ln,top.r.rn)+1}
+	top,err=doBalance(top)
 	return top,old,err
 }
 /*
