@@ -11,9 +11,14 @@ import (
 func comp(l,r interface{}) int {
 	return l.(int)-r.(int)
 }
-const MAX=200
+const MAX=20
 func main(){
+	中文()
+	test2()
 	test3()
+}
+func 中文(){
+	fmt.Println("中文")
 }
 func test3(){
 	bi:=make([]int,MAX)

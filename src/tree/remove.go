@@ -63,9 +63,11 @@ return v1,v2
 	return doBalance(ntop)
 }
 /*
- 查找最右边的节点, 该节点将会被放置在被删除的位置
- most_r, 将是新的root
- npn 是取出节点后。需要重新平衡后的当前树的root
+ find most righ node, it should be place at position that has been deleted.
+
+ most_r, most_r is now root
+
+ npn is root of balance subtree
 */
 func rm_most_right(pn *node) (most_r,npn *node,err error) {
 	if pn== nil {

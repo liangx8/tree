@@ -139,7 +139,6 @@ func doBalance(top *node) (*node,error) {
 	switch bal {
 	case -2:
 	// left < right
-	// 不能简单的判断右子树为nil. 需要根据高度来判断
 		rcp:=top.r.ln-top.r.rn
 		switch rcp {
 		case 1:
@@ -237,7 +236,7 @@ func rotate_right(top *node) *node {
 
 */
 func rotate_lr(top *node) *node{
-// 可以使用先 rotate_left 然后 rotate_right 实现
+
 	f:=top
 	b:=top.l
 	d:=top.l.r
