@@ -3,7 +3,7 @@ import (
 	"fmt"
 	"io"
 
-	"treeview"
+	"github.com/liangx8/tree/treeview"
 )
 type model struct{
 	getRoot func() interface{}

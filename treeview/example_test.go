@@ -1,7 +1,7 @@
 package treeview_test
 import (
 	"os"
-	"treeview"
+	"github.com/liangx8/tree/treeview"
 )
 func ExamplePrintTree() {
 	treeview.PrintTree(os.Stdout,treeview.NewSampleModel())

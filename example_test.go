@@ -4,8 +4,8 @@ import (
 	"math/rand"
 	"fmt"
 
-	"tree"
-	"treeview"
+	"github.com/liangx8/tree"
+	"github.com/liangx8/tree/treeview"
 )
 
 func ExampleCreateModel(){
