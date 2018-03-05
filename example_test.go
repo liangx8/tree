@@ -18,7 +18,7 @@ func ExampleCreateModel(){
 		ai[i],ai[n]=ai[n],ai[i]
 	}
 
-	bt:=tree.New(func(l,r interface{}) int{ return l.(int)-r.(int) },false)
+	bt:=tree.New(func(l,r interface{}) int{ return l.(int)-r.(int) })
 	for _,i := range ai {
 		bt.Add(i)
 	}
@@ -29,7 +29,6 @@ func ExampleCreateModel(){
 	}
 	model,_:=tree.CreateModel(bt,fn,3)
 	treeview.PrintTree(os.Stdout,model)
-
 }
 func ExamplePrintTree(){
 	ai:=make([]int,10)
@@ -41,7 +40,7 @@ func ExamplePrintTree(){
 		ai[i],ai[n]=ai[n],ai[i]
 	}
 
-	bt:=tree.New(func(l,r interface{}) int{ return l.(int)-r.(int) },false)
+	bt:=tree.New(func(l,r interface{}) int{ return l.(int)-r.(int) })
 	for _,i := range ai {
 		bt.Add(i)
 	}

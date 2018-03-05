@@ -82,7 +82,7 @@ func PrintTree( w io.Writer, bt Btree,size int, str func(interface{})string){
 		return
 	}
 	t := tree.top
-	height=max(t.ln,t.rn)+1
+	height=calc_depth(t)
 	col:=0
 	var pt func(io.Writer,*node,func(interface{})string,[]int)
 	pt=func(w io.Writer,top *node,str func(interface{})string,noshow []int){
