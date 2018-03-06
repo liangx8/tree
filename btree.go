@@ -4,159 +4,165 @@ package tree
 import (
 	"fmt"
 )
+
 // compare two elements
 //
 // return negative indicate l < r, 0 indicate l == r, positive indicate l > r
-type Compare func(l,r interface{}) int
+type Compare func(l, r interface{}) int
 type node struct {
-	e interface{}
-	l,r *node
-	ln,rn int
+	e      interface{}
+	l, r   *node
+	ln, rn int
 }
-type Btree interface{
+type Btree interface {
 	// add element
 	Add(e interface{}) error
 	// get element
-	Get(e interface{}) (interface{},error)
+	Get(e interface{}) (interface{}, error)
 	// iterate each element
 	// it will be stop and return with error immediately if callback return a error
-	Each(callback func(int,interface{})error ) error
+	Each(callback func(int, interface{}) error) error
 	// remove element and return it if found element in btree
-	Remove(e interface{}) (interface{},error)
+	Remove(e interface{}) (interface{}, error)
 }
-type btree struct{
-	c Compare
+type btree struct {
+	c   Compare
 	top *node
 }
-func (t *btree)Each( cb func(int,interface{})error )error {
+
+func (t *btree) Each(cb func(int, interface{}) error) error {
 	idx := 0
 	if t.top == nil {
 		return nil
 	}
-	
-	return walk(t.top,cb,&idx)
+
+	return walk(t.top, cb, &idx)
 }
-func (t *btree)Add(e interface{}) error {
-	ntop,err:=recurs_add(t.top,e,t.c)
+func (t *btree) Add(e interface{}) error {
+	ntop, err := recurs_add(t.top, e, t.c)
 	if err != nil {
 		return err
 	}
-	t.top=ntop
+	t.top = ntop
 	return nil
 }
-func (t *btree)Remove(e interface{}) (interface{},error){
-	ntop,old,err:=find_for_remove(t.top,e,t.c)
-	t.top=ntop
-	return old,err
+func (t *btree) Remove(e interface{}) (interface{}, error) {
+	ntop, old, err := find_for_remove(t.top, e, t.c)
+	t.top = ntop
+	return old, err
 }
-func (t *btree)Get(e interface{}) (interface{},error) {
-	n,err:=find(t.top,e,t.c)
+func (t *btree) Get(e interface{}) (interface{}, error) {
+	n, err := find(t.top, e, t.c)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return n.e,nil
+	return n.e, nil
 }
+
 // cp compare two elements
-func New(cp Compare) Btree{
-	return &btree{c:cp}
+func New(cp Compare) Btree {
+	return &btree{c: cp}
 }
-func walk(top *node,cb func(int,interface{})error,idx *int) error {
+func walk(top *node, cb func(int, interface{}) error, idx *int) error {
 	if top.l != nil {
-		if err:=walk(top.l,cb,idx); err != nil {
+		if err := walk(top.l, cb, idx); err != nil {
 			return err
 		}
 	}
 
-	if err:=cb(*idx,top.e); err != nil {
+	if err := cb(*idx, top.e); err != nil {
 		return err
 	}
-	*idx ++
+	*idx++
 	if top.r != nil {
-		if err:=walk(top.r,cb,idx); err != nil {
+		if err := walk(top.r, cb, idx); err != nil {
 			return err
 		}
 	}
 
 	return nil
 }
-func find(top *node,e interface{},c Compare) (*node,error){
+func find(top *node, e interface{}, c Compare) (*node, error) {
 	if top == nil {
-		return nil,NoFound
+		return nil, NoFound
 	}
-	cp := c(top.e,e)
+	cp := c(top.e, e)
 	if cp == 0 {
-		return top,nil
+		return top, nil
 	}
 	if cp > 0 {
-		return find(top.l,e,c)
+		return find(top.l, e, c)
 	}
-	return find(top.r,e,c)
+	return find(top.r, e, c)
 }
+
 /*
 func max(x,y int) int {
 	if x>y {return x} else { return y}
-} 
+}
 */
-func calc_depth(n *node) int{
-	if n==nil { return 0 }
+func calc_depth(n *node) int {
+	if n == nil {
+		return 0
+	}
 	if n.ln > n.rn {
 		return n.ln + 1
 	}
 	return n.rn + 1
 }
-func recurs_add(top *node,e interface{},cp Compare) (*node,error){
+func recurs_add(top *node, e interface{}, cp Compare) (*node, error) {
 	if top == nil {
-		return &node{e:e},nil
+		return &node{e: e}, nil
 	}
-	cpv:=cp(top.e,e)
-	if cpv>0 {
-		newl,err:=recurs_add(top.l,e,cp)
-		if err != nil{
-			return nil,err
+	cpv := cp(top.e, e)
+	if cpv > 0 {
+		newl, err := recurs_add(top.l, e, cp)
+		if err != nil {
+			return nil, err
 		}
-		top.l=newl
-		top.ln=calc_depth(top.l)
+		top.l = newl
+		top.ln = calc_depth(top.l)
 	} else {
 		// right site
-		newr,err:=recurs_add(top.r,e,cp)
-		if err != nil{
-			return nil,err
+		newr, err := recurs_add(top.r, e, cp)
+		if err != nil {
+			return nil, err
 		}
-		top.r=newr
-		top.rn=calc_depth(top.r)
+		top.r = newr
+		top.rn = calc_depth(top.r)
 	}
-	return doBalance(top),nil
+	return doBalance(top), nil
 }
 func doBalance(top *node) *node {
-	bal:=top.ln-top.rn
+	bal := top.ln - top.rn
 	switch bal {
 	case -2:
-	// left < right
-		rcp:=top.r.ln-top.r.rn
+		// left < right
+		rcp := top.r.ln - top.r.rn
 		switch rcp {
 		case 1:
-			ntop:=rotate_rl(top)
+			ntop := rotate_rl(top)
 			return ntop
-		case 0,-1:
-			ntop:=rotate_left(top)
+		case 0, -1:
+			ntop := rotate_left(top)
 			return ntop
 		default:
 			panic("left < right rotate error(unexpect error)")
 		}
 	case 2:
-	// left > right
-		lcp:=top.l.ln-top.l.rn
-		switch lcp{
+		// left > right
+		lcp := top.l.ln - top.l.rn
+		switch lcp {
 		case -1:
-			ntop:=rotate_lr(top)
+			ntop := rotate_lr(top)
 			return ntop
-		case 0,1:
-			ntop:=rotate_right(top)
+		case 0, 1:
+			ntop := rotate_right(top)
 			return ntop
 		default:
 			panic("left > right rotate error(unexpect error)")
 		}
-	case 0,1,-1:
+	case 0, 1, -1:
 	default:
 		panic("Not a balance tree(Unexpect error)")
 	}
@@ -164,14 +170,14 @@ func doBalance(top *node) *node {
 }
 
 /*
-      b                 d
-     / \               / \
-    a   d             b   e
-    |  / \    ====>  / \  |
-    ? c   e         a   c ?
-      |   |         |   |
-      ?   ?         ?   ?
- */
+     b                 d
+    / \               / \
+   a   d             b   e
+   |  / \    ====>  / \  |
+   ? c   e         a   c ?
+     |   |         |   |
+     ?   ?         ?   ?
+*/
 
 func rotate_left(top *node) *node {
 	if top == nil || top.r == nil {
@@ -181,12 +187,13 @@ func rotate_left(top *node) *node {
 	c := top.r.l
 	d := top.r
 
-	b.r=c
-	b.rn=calc_depth(b.r)
-	d.l=b
-	d.ln=calc_depth(d.l);
+	b.r = c
+	b.rn = calc_depth(b.r)
+	d.l = b
+	d.ln = calc_depth(d.l)
 	return d
 }
+
 /*
       d               b
      / \             / \
@@ -195,40 +202,39 @@ func rotate_left(top *node) *node {
   a   c ?           ? c   e
   |   |               |   |
   ?   ?               ?   ?
- */
+*/
 
 func rotate_right(top *node) *node {
-	if top == nil || top.l == nil{
+	if top == nil || top.l == nil {
 		panic("left node should not nil for right rotation")
 	}
 	d := top
 	b := top.l
 	c := top.l.r
 
-	d.l=c
-	d.ln=calc_depth(d.l)
-	b.r=d
-	b.rn=calc_depth(b.r)
+	d.l = c
+	d.ln = calc_depth(d.l)
+	b.r = d
+	b.rn = calc_depth(b.r)
 	return b
 }
-func rotate_lr(top *node) *node{
-	if top == nil || top.l == nil || top.l.r == nil{
+func rotate_lr(top *node) *node {
+	if top == nil || top.l == nil || top.l.r == nil {
 		panic("not fulfill left than right rotation")
 	}
-	top.l=rotate_left(top.l)
-	top.ln=calc_depth(top.l)
+	top.l = rotate_left(top.l)
+	top.ln = calc_depth(top.l)
 	return rotate_right(top)
 }
-func rotate_rl(top *node) *node{
+func rotate_rl(top *node) *node {
 	if top == nil || top.r == nil || top.r.l == nil {
 		panic("not fulfill right than left rotation")
 	}
-	top.r=rotate_right(top.r)
-	top.rn=calc_depth(top.r)
+	top.r = rotate_right(top.r)
+	top.rn = calc_depth(top.r)
 	return rotate_left(top)
 }
 
 var (
-	NoFound= fmt.Errorf("Element no found")
+	NoFound = fmt.Errorf("Element no found")
 )
-
