@@ -3,33 +3,67 @@ package tree
 
 import (
 	"fmt"
+	"github.com/liangx8/tree/treeview"
 )
 
 // compare two elements
 //
 // return negative indicate l < r, 0 indicate l == r, positive indicate l > r
-type Compare func(l, r interface{}) int
-type node struct {
-	e      interface{}
-	l, r   *node
-	ln, rn int
-}
-type Btree interface {
-	// add element
-	Add(e interface{}) error
-	// get element
-	Get(e interface{}) (interface{}, error)
-	// iterate each element
-	// it will be stop and return with error immediately if callback return a error
-	Each(callback func(int, interface{}) error) error
-	// remove element and return it if found element in btree
-	Remove(e interface{}) (interface{}, error)
-}
-type btree struct {
-	c   Compare
-	top *node
-}
 
+type (
+	Compare func(l, r interface{}) int
+	node    struct {
+		e      interface{}
+		l, r   *node
+		ln, rn int
+	}
+	Btree interface {
+		// add element
+		Add(e interface{}) error
+		// get element
+		Get(e interface{}) (interface{}, error)
+		// iterate each element
+		// it will be stop and return with error immediately if callback return a error
+		Each(callback func(int, interface{}) error) error
+		// remove element and return it if found element in btree
+		Remove(e interface{}) (interface{}, error)
+	}
+	btree struct {
+		c   Compare
+		top *node
+	}
+	printModel struct{
+		n *node
+		asString func(interface{}) string
+		viewWidth func() int
+	}
+)
+
+func (pm *printModel)ChildCount() int{
+	if pm.n.l == nil && pm.n.r == nil {return 0}
+	return 2
+}
+func (pm *printModel)ChildAt(idx int) treeview.Model{
+	if idx == 0 {
+		if pm.n.l == nil {return nil}
+		return &printModel{n:pm.n.l,asString:pm.asString,viewWidth:pm.viewWidth}
+	}
+	if pm.n.r == nil {return nil}
+	return &printModel{n:pm.n.r,asString:pm.asString,viewWidth:pm.viewWidth}
+}
+func (pm *printModel)ObjectWidth() int{
+	return pm.viewWidth()
+}
+func (pm *printModel)String() string{
+	return pm.asString(pm.n.e)
+}
+func ToModel(bt Btree,fn func(interface{}) string,width int) treeview.Model{
+	return &printModel{
+		n:bt.(*btree).top,
+		asString:fn,
+		viewWidth:func()int{return width},
+	}
+}
 func (t *btree) Each(cb func(int, interface{}) error) error {
 	idx := 0
 	if t.top == nil {
