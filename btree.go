@@ -3,6 +3,7 @@ package tree
 
 import (
 	"fmt"
+
 	"github.com/liangx8/tree/treeview"
 )
 
@@ -32,36 +33,42 @@ type (
 		c   Compare
 		top *node
 	}
-	printModel struct{
-		n *node
-		asString func(interface{}) string
+	printModel struct {
+		n         *node
+		asString  func(interface{}) string
 		viewWidth func() int
 	}
 )
 
-func (pm *printModel)ChildCount() int{
-	if pm.n.l == nil && pm.n.r == nil {return 0}
+func (pm *printModel) ChildCount() int {
+	if pm.n.l == nil && pm.n.r == nil {
+		return 0
+	}
 	return 2
 }
-func (pm *printModel)ChildAt(idx int) treeview.Model{
+func (pm *printModel) ChildAt(idx int) treeview.Model {
 	if idx == 0 {
-		if pm.n.l == nil {return nil}
-		return &printModel{n:pm.n.l,asString:pm.asString,viewWidth:pm.viewWidth}
+		if pm.n.l == nil {
+			return nil
+		}
+		return &printModel{n: pm.n.l, asString: pm.asString, viewWidth: pm.viewWidth}
 	}
-	if pm.n.r == nil {return nil}
-	return &printModel{n:pm.n.r,asString:pm.asString,viewWidth:pm.viewWidth}
+	if pm.n.r == nil {
+		return nil
+	}
+	return &printModel{n: pm.n.r, asString: pm.asString, viewWidth: pm.viewWidth}
 }
-func (pm *printModel)ObjectWidth() int{
+func (pm *printModel) ObjectWidth() int {
 	return pm.viewWidth()
 }
-func (pm *printModel)String() string{
+func (pm *printModel) String() string {
 	return pm.asString(pm.n.e)
 }
-func ToModel(bt Btree,fn func(interface{}) string,width int) treeview.Model{
+func ToModel(bt Btree, fn func(interface{}) string, width int) treeview.Model {
 	return &printModel{
-		n:bt.(*btree).top,
-		asString:fn,
-		viewWidth:func()int{return width},
+		n:         bt.(*btree).top,
+		asString:  fn,
+		viewWidth: func() int { return width },
 	}
 }
 func (t *btree) Each(cb func(int, interface{}) error) error {
@@ -116,6 +123,7 @@ func walk(top *node, cb func(int, interface{}) error, idx *int) error {
 
 	return nil
 }
+
 func find(top *node, e interface{}, c Compare) (*node, error) {
 	if top == nil {
 		return nil, NoFound
